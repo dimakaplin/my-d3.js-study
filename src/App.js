@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 // import logo from './logo.svg';
 import './App.css';
-import { LineChart, Line } from 'recharts';
+// import { LineChart, Line } from 'recharts';
 // import YAxis from 'recharts/lib/cartesian/YAxis';
-import { XAxis, YAxis } from 'recharts';
+// import { XAxis, YAxis } from 'recharts';
 import * as d3 from "d3";
-import { ResponsivePie } from '@nivo/pie';
 import axios from 'axios';
 
 let jsonData = [];
@@ -15,20 +14,21 @@ class App extends Component {
     super(props);
     this.state = {
       data: [{"label":"one", "value":20}, 
-      {"label":"two", "value":50}, 
-      {"label":"three", "value":30}],
+      {"label":"two", "value":55}, 
+      {"label":"three", "value":25}],
       innerData: [{"label":"one", "value":15}, 
       {"label":"two", "value":15}, 
       {"label":"four", "value":30},
       {"label":"five", "value":35},
-      {"label":"six", "value":5}] 
+      {"label":"six", "value":5}],
+      padAngle: false 
     }
 
   }
 
   componentDidMount() {
 
-this.twoPies();
+    this.twoPies();
 
   } 
 
@@ -46,6 +46,66 @@ this.twoPies();
   .then(this.setState({newData: jsonData})); */
 
   
+
+  }
+  onePieAnim() {
+    const data = [14, 23, 18];
+    const w = 400,
+          h = 400,
+          r = 150,
+        color = d3.scaleLinear()
+            .domain([0, 3])
+            .range(["red", "white"]);
+
+    const arc = d3.arc()
+        .innerRadius(100)
+        .outerRadius(0)
+
+    const arc2 = d3.arc()
+        .innerRadius(120)
+        .outerRadius(0)
+        .padAngle(0);
+
+    const pie = d3.pie()
+        .value(function (d) { return d;})
+        .padAngle(0);
+    const pie2 = d3.pie()
+        .value(function (d) { return d;})
+        .padAngle(0.03);
+    
+
+    const group = d3.select('svg')
+        .append("g")                
+        .attr("transform", "translate(" + r + "," + r + ")");
+
+    const arcs1 =  group.selectAll(".arc")
+        .data(pie(data))
+        .enter()
+        .append("g")
+        .attr("class", "arc");
+
+    const paths = arcs1.append("path")
+        .attr('fill', (d, i)=> color(i))
+        .attr("class", "arc1")
+        .attr("d", arc);
+
+    
+    /*paths.transition()
+        .delay(200)
+        .duration(1000)
+        .attr("d", arc2);*/
+    
+    const newPath = () => {
+      paths.transition()
+      .delay(200)
+      .duration(1000)
+      .attr("d", arc2);
+    } 
+
+    d3.select('h1').on('click', newPath)    
+    
+    
+    
 
   }
 
@@ -95,11 +155,11 @@ this.twoPies();
           .range(["red", "white"]);
 
     const vis = d3.select(".d3-elem")
-          .append("svg")              //create the SVG element inside the <body>
-          .data([this.state.data])                   //associate our data with the document
-          .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+          .append("svg")              
+          .data([this.state.data])                 
+          .attr("width", w)           
           .attr("height", h)
-          .append("g")                //make a group to hold our pie chart
+          .append("g")                
           .attr("transform", "translate(" + r + "," + r + ")");
 
     const arc = d3.arc()
@@ -180,73 +240,91 @@ arcs.append("svg:text")
   }
   twoPies() {
     console.log(this.state.newData);
+    let counterTextLeg = 0;
+    let counterRectLeg = 0;
     const svgH = () => document.getElementsByTagName('svg')[0].getBoundingClientRect().height;
     const svgW = () => document.getElementsByTagName('svg')[0].getBoundingClientRect().width;
     const calcRadius = () => {if (h >= w) {return w} else {return h}}; 
     const w = svgW(),
-    h = svgH(),
-    r = calcRadius() / 2,
-    r2 = calcRadius() / 4,
-    color = d3.scaleLinear()
-    .domain([0, 3])
-    .range(["red", "white"]),
-    color2 = d3.scaleLinear()
-    .domain([0, 6])
-    .range(["grey", "green"]);
-console.log(w)
-console.log(h)
-console.log(r2)    
+          h = svgH(),
+          r = 200,
+          r2 = 100,
+          color = d3.scaleLinear()
+          .domain([0, 3])
+          .range(["#4970FF", "#9172FF"]),
+          color2 = d3.scaleLinear()
+          .domain([0, 6])
+          .range(["#6BC5FF", "#CA89FF"]),
+          calcLegendText = (x) => {
+            counterTextLeg = counterTextLeg + x
+            return counterTextLeg },
+          calcLegendRect = (x) => {
+            counterRectLeg = counterRectLeg + x
+            return counterRectLeg } 
+    console.log(w)
+    console.log(h)
+    console.log(r2)
+
 
 const vis = d3.select("svg")
-   // .append("svg")              //create the SVG element inside the <body>
-    .data([this.state.data])                   //associate our data with the document
-    //.attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
-    //.attr("height", h)
-    .append("g")                //make a group to hold our pie chart
-    .attr("transform", "translate(" + w/2 + "," + r + ")");
+
+    .data([this.state.data])                  
+    .append("g")
+    .attr('class', 'all')            
+    .attr("transform", "translate(" + 250 + "," + 220 + ")");
 
     const vis2 = d3.select("svg")
-    // .append("svg")              //create the SVG element inside the <body>
-    .data([this.state.innerData])                   //associate our data with the document
-    //.attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
-    //.attr("height", h)
-    .append("g")                //make a group to hold our pie chart
-    .attr("transform", "translate(" + w/2 + "," + r + ")");
+    .data([this.state.innerData])              
+    .append("g")
+    .attr('class', 'all')                  
+    .attr("transform", "translate(" + 250 + "," + 220 + ")");
 
-const arc = d3.arc()
-.outerRadius(r)
-.innerRadius(r / 2);
-const arc2 = d3.arc()
-.outerRadius(r2)
-.innerRadius(0);
+    const arc = d3.arc()
+      .outerRadius(r)
+      .innerRadius(r / 2);
+    const newArc = d3.arc()
+      .outerRadius(r + 7)
+      .innerRadius(r / 2 + 7)
+      .padAngle(0.02)
+
+    const arc2 = d3.arc()
+      .outerRadius(r2)
+      .innerRadius(0);
+    const newArc2 = d3.arc()
+      .outerRadius(r2 + 3)
+      .innerRadius(0)
+      .padAngle(0.04);
 
 
 
 const pie = d3.pie()
-     .value((d)=> d.value);
+     .value((d)=> d.value)
+
+
+const pieAngle = () => {pie.padAngle(0.2); console.log('asdasd')};     
 
 const arcs = vis.selectAll('g.slice')
     .data(pie)
     .enter()
     .append('svg:g')
     .attr('class', 'slice');
-    const arcs2 = vis2.selectAll('g.slice')
+
+const arcs2 = vis2.selectAll('g.slice')
     .data(pie)
     .enter()
     .append('svg:g')
     .attr('class', 'slice');
 
-arcs.append('svg:path')
+const paths = arcs.append('path')
     .attr('fill', (d, i)=> color(i))
     .attr('d', arc)
-    .attr('class', 'arc')
-
-arcs2.append('svg:path')
+    
+const paths2 = arcs2.append('path')
     .attr('fill', (d, i)=> color2(i))
     .attr('d', arc2)
-    .attr('class', 'arc')
     
-arcs.append("svg:text")
+    
+const text1 = arcs.append("svg:text")
   .attr('class', 'arc')                                    
   .attr("transform", function(d) {                   
     
@@ -257,7 +335,10 @@ arcs.append("svg:text")
 .attr("text-anchor", "middle")                         
 .text((d, i) =>this.state.data[i].label); 
 
-arcs2.append("svg:text")                                    
+
+
+const text2 = arcs2.append("svg:text")   
+.attr('class', 'arc')                                 
   .attr("transform", function(d) {                   
     
     d.innerRadius = 0;
@@ -267,7 +348,108 @@ arcs2.append("svg:text")
 .attr("text-anchor", "middle")                         
 .text((d, i) =>this.state.innerData[i].label);
 
+// func for anim
+
+const animPathOver = ()=> {
+  paths
+  .transition()
+  .delay(200)
+  .duration(1000)
+.attr('d', newArc)
+
+text1.transition()
+.delay(200)
+.duration(1000)
+.attr("transform", function(d) {                   
+    
+  d.innerRadius = 0;
+  d.outerRadius = r;
+  return "translate(" + newArc.centroid(d) + ")";        
+}).text((d, i) =>d.value+'%')
+paths2
+.transition()
+.delay(200)
+.duration(1000)
+.attr('d', newArc2)
+
+text2.transition()
+.delay(200)
+.duration(1000)
+.attr("transform", function(d) {                   
+  
+d.innerRadius = 0;
+d.outerRadius = r;
+return "translate(" + newArc2.centroid(d) + ")";        
+}).text((d, i) =>d.value+'%')
+
+
+}
+
+const animPathOut = ()=> {
+  paths
+  .transition()
+  .delay(50)
+  .duration(500)
+.attr('d', arc)
+
+text1.transition()
+.delay(50)
+.duration(500)
+.attr("transform", function(d) {                   
+    
+  d.innerRadius = 0;
+  d.outerRadius = r;
+  return "translate(" + arc.centroid(d) + ")";        
+}).text((d, i) =>this.state.data[i].label);
+paths2
+.transition()
+.delay(50)
+.duration(500)
+.attr('d', arc2)
+
+text2.transition()
+.delay(50)
+.duration(500)
+.attr("transform", function(d) {                   
+  
+d.innerRadius = 0;
+d.outerRadius = r;
+return "translate(" + arc2.centroid(d) + ")";        
+}).text((d, i) =>this.state.innerData[i].label);
+
+}
+
+
 console.log(document.getElementsByTagName('svg')[0].getBoundingClientRect());
+
+
+d3.selectAll('.all')// .transition().style("color","grey").duration(5000)
+.on('mouseover', animPathOver)
+.on('mouseout', animPathOut)
+
+const legend = d3.select('svg')
+  .append('g')
+  .attr('class', 'legend');
+const elems = legend.selectAll('.legendElem')
+  .data(this.state.data)
+  .enter()
+  .append('text')
+  .text((d, i) =>d.label)
+  .attr('class', 'legendElem')
+  .attr("x", (d) => calcLegendText(100))
+  .attr("y", 500 - 30)
+  
+const rects = legend.selectAll('rect')
+    .data(this.state.data)
+    .enter()
+    .append('rect')
+    .attr('height', 10)
+    .attr('width', 10)
+    .attr("x", (d) => calcLegendRect(130))
+    .attr("y", 500 - 39)
+    .attr('fill', (d, i)=> color(i))
+
+  
 
   }
   render() {
@@ -276,7 +458,9 @@ console.log(document.getElementsByTagName('svg')[0].getBoundingClientRect());
       <div className="App">
       
         <div className='d3-elem'>
-        <svg></svg></div>
+          <svg></svg>
+        </div>
+        <h1>123123</h1>
       </div>
     );
   }
