@@ -13,17 +13,16 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
 .slice:hover {
-  opacity: 0.8;
+  opacity: 1;
   transition: 100ms;
 }
-svg {
-  height: 500px;
-  width: 500px;
-  min-height: 25vh;
-  min-width: 25vw;
-  background-color: rgba(226, 225, 225, 0.877);
-}
+
+
+
+
+
 path {
   stroke: rgba(201, 201, 201, 0.589);
 }
@@ -35,6 +34,7 @@ path {
 
 .arc {
   fill: white;
+
 }
 h1 {
   color: white;

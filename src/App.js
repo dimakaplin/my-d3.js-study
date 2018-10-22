@@ -2,6 +2,31 @@ import React, { Component } from 'react';
 import './App.css';
 import * as d3 from "d3";
 import axios from 'axios';
+import { LineChart, Brush, ReferenceLine, LabelList, ResponsiveContainer, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, } from 'recharts';
+
+// import csv from 'csvtojson'
+
+// const fs = require('fs')
+
+class CustomToolTip extends Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const { active } = this.props;
+        if (active) {
+            const { payload, label } = this.props;
+            return (
+              <div className="custom-tooltip">
+                <p className="label">{`${label} : ${payload[0].value}`}</p>
+                <p className="intro">{this.getIntroOfPage(label)}</p>
+                <p className="desc">Anything you want can be displayed here.</p>
+              </div>)}
+    }
+}
+
+
+
 
 let jsonData = [];
 
@@ -9,22 +34,33 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [{"label":"one", "value":20}, 
-      {"label":"two", "value":55}, 
-      {"label":"three", "value":25}],
-      innerData: [{"label":"one", "value":15}, 
-      {"label":"two", "value":15}, 
-      {"label":"four", "value":30},
-      {"label":"five", "value":35},
-      {"label":"six", "value":5}],
-      padAngle: false 
+        data: [
+            {"label":"one", "value":20}, 
+            {"label":"two", "value":55}, 
+            {"label":"three", "value":25}
+        ],
+        innerData: [
+            {"label":"one", "value":15}, 
+            {"label":"two", "value":15}, 
+            {"label":"four", "value":30},
+            {"label":"five", "value":35},
+            {"label":"six", "value":5}
+        ],
+        padAngle: false 
     }
 
   }
 
   componentDidMount() {
+    console.log('123')
+        console.log(this.state.dataLine)
 
-    this.twoPies();
+
+
+
+   // this.twoPies();
+   //this.lineGraph()
+   
 
   } 
 
@@ -40,6 +76,59 @@ class App extends Component {
    /* axios.get('https://jsonplaceholder.typicode.com/posts')
   .then((response) => response.data.map((item, i) => jsonData[i] = item))
   .then(this.setState({newData: jsonData})); */
+
+  const dataCsv = d3.csvParse(`count,daym
+5034,30
+6186,29
+6049,28
+6074,27
+6117,26
+6108,25
+6071,24
+6069,23
+6091,22
+6033,21
+6036,20
+6097,19
+5996,18
+6041,17
+5830,16`);
+
+const dataNew = dataCsv.map((item)=> {item.count = +item.count;
+                                      item.daym = item.daym;
+                                      const newItem = {count: item.count, daym: item.daym}
+                                        return newItem  }).reverse()
+ 
+                                   
+  this.setState({dataLine: dataNew})
+let miners = d3.csvParse(`miner,sum_gas
+0xea674fdde714fd979de3edf0f56aa9716b898ec8,12132020104
+0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c,6866655065
+0x829bd824b016326a401d083b33d092293333a830,5471115574
+0xb2930b35844a230f00e51431acae96fe543a0347,4312417083
+0x52bc44d5378309ee2abf1539bf71de1b7d7be3b5,3896785047
+0xf3b9d2c81f2b24b0fa0acaaa865b7d9ced5fc2fb,1921170120
+0x2a65aca4d5fc5b5c859090a6c34d164135398226,809092568
+0xd4383232c8d1dbe0e03bdfab849871fa17e61807,694727117
+0x4a071eee72bc8664c81b62836932ed0d246da82b,630462983
+0xcc16e3c00dbbe76603fa833ec20a48f786dfe610,446528697`).sort((a, b)=> b.sum_gas - a.sum_gas);
+
+miners = miners.map((item, i) => {  const prevGas = () => {if(i === 0) {return 0}else{return i-1}};
+                                    const newObj = {miner: item.miner,
+                                    sum_gas: (+item.sum_gas),
+                                    maxGas: (+item.sum_gas),
+                                     prevGas: (+item.sum_gas),
+                                     labelGas: `${item.sum_gas} gas`,
+                                     labelMax: `${Math.ceil((+item.sum_gas) / (+miners[0].sum_gas) * 100)}%`,
+                                     labelPrev: `${Math.ceil((+item.sum_gas)/(+miners[prevGas()].sum_gas)*100)}%`
+                                    }
+                                    return newObj})
+
+this.setState({dataMiners: miners});
+console.log(miners)
+
+  
+  
 
   
 
@@ -108,8 +197,25 @@ class App extends Component {
   lineGraph() {                     // lineGrapf whithout animation axis and legend                          
     console.log(this.state.data[1].x)
 
-    const dataSortX = this.state.data.map((item)=>{let elem = item.x; return elem});
-    const dataSortY = this.state.data.map((item)=>{let elem = item.y; return elem});
+    const csvData = d3.csvParse(`count,daym
+5034,30
+6186,29
+6049,28
+6074,27
+6117,26
+6108,25
+6071,24
+6069,23
+6091,22
+6033,21
+6036,20
+6097,19
+5996,18
+6041,17
+5830,16`)
+
+    const dataSortX = csvData.map((item)=>{let elem = item.count; return elem});
+    const dataSortY = csvData.map((item)=>{let elem = item.daym; return elem});
 
     const xScale = d3.scaleLinear()
     .domain([0, d3.max(dataSortX, (d)=>{return d})])
@@ -120,9 +226,9 @@ class App extends Component {
 
     console.log(xScale(15))
 
-    const line = d3.pie()
-    .x((d)=>{return xScale(d.x)})
-    .y((d)=>{return yScale(d.y)});
+    const line = d3.line()
+    .x((d)=>{return xScale(d.count)})
+    .y((d)=>{return yScale(d.daym)});
 
  
 
@@ -136,7 +242,7 @@ class App extends Component {
 
  
 
-    svg.append('path').attr('d', line(this.state.data));
+    svg.append('path').attr('d', line(csvData));
 
 
 
@@ -290,12 +396,13 @@ const newArc = d3.arc()
     .innerRadius(r / 2 + 10)
     .padAngle(0.02)
 
+
 const arc2 = d3.arc()
     .outerRadius(r2)
-    .innerRadius(40);
+    .innerRadius(30);
 const newArc2 = d3.arc()
     .outerRadius(r2 + 3)
-    .innerRadius(40 + 3)
+    .innerRadius(30 + 3)
     .padAngle(0.05);
 
 
@@ -309,7 +416,10 @@ const arcs = vis.selectAll('g.slice')
     .data(pie)
     .enter()
     .append('svg:g')
-    .attr('class', 'slice');
+    .attr('class', 'slice')
+    .on('mouseover', () => 
+    {console.log(d3.selectAll('.slice').filter((d, i)=>{if(d !== d3.event.target) return d;}))
+       })
 
 const arcs2 = vis2.selectAll('g.slice')
     .data(pie)
@@ -321,6 +431,8 @@ const paths = arcs.append('path')
     .attr('fill', (d, i)=> color(i))
     .attr('d', arc)
     .style('opacity', 0)
+    
+    
     
 const paths2 = arcs2.append('path')
     .attr('fill', (d, i)=> color2(i))
@@ -334,7 +446,7 @@ const text1 = arcs.append("svg:text")
     
     d.innerRadius = 0;
     d.outerRadius = r;
-    return "translate(" + arc.centroid(-50) + ")";        
+    return "translate(" + arc.centroid(d) + ")";        
     })
     .attr("text-anchor", "middle")
     .style('opacity', 0)                         
@@ -348,7 +460,7 @@ const text2 = arcs2.append("svg:text")
     
   d.innerRadius = 0;
   d.outerRadius = r2;
-  return "translate(" + arc2.centroid(-50) + ")";        
+  return "translate(" + arc2.centroid(d) + ")";        
   })
   .attr("text-anchor", "middle")
   .style('opacity', 0)                         
@@ -363,6 +475,7 @@ const text2 = arcs2.append("svg:text")
 
 
 // funcs for animation
+// const t = d3.transition().delay(500).duration(1000).ease(d3.easeLinear)
 
 const animPathOver = ()=> {
   paths
@@ -401,45 +514,43 @@ const animPathOver = ()=> {
     return "translate(" + newArc2.centroid(d) + ")";        
     }).text((d, i) =>d.value+'%')
     .style('opacity', 1)
-    
-
 
 }
 
 const animPathOut = ()=> {
   paths
     .transition()
-    .delay(50)
+    .delay(500)
     .duration(500)
     .attr('d', arc)
     .style('opacity', 1)
 
   text1.transition()
-    .delay(50)
+    .delay(500)
     .duration(500)
     .attr("transform", function(d) {                   
       
     d.innerRadius = 0;
     d.outerRadius = r;
-    return "translate(" + arc.centroid(-50) + ")";        
+    return "translate(" + arc.centroid(d) + ")";        
     }).text((d, i) =>this.state.data[i].value+'%')
     .style('opacity', 0)
 
   paths2
     .transition()
-    .delay(50)
+    .delay(500)
     .duration(500)
     .attr('d', arc2)
     .style('opacity', 1)
 
   text2.transition()
-    .delay(50)
+    .delay(500)
     .duration(500)
     .attr("transform", function(d) {                   
   
     d.innerRadius = 0;
     d.outerRadius = r;
-    return "translate(" + arc2.centroid(-50) + ")";        
+    return "translate(" + arc2.centroid(d) + ")";        
     }).text((d, i) =>this.state.innerData[i].value+'%')
     .style('opacity', 0)
 
@@ -452,6 +563,7 @@ console.log(document.getElementsByTagName('svg')[0].getBoundingClientRect());
 d3.selectAll('.all')// .transition().style("color","grey").duration(5000)
     .on('mouseover', animPathOver)
     .on('mouseout', animPathOut)
+    
 
 // this is attemt of legend realisation
 
@@ -471,6 +583,7 @@ const newElems = legNew.selectAll('.rects')
     .attr('y', 435)
     .attr('x', (d)=>calcLegendRect(100))
     .attr('fill', (d, i)=> color(i))
+
 const newText = legNew.selectAll('text')
     .data(this.state.data)
     .enter()
@@ -526,9 +639,43 @@ const newText2 = legNew2.selectAll('text')
 
     return (
       <div className="App">
+
+      <ResponsiveContainer width={1000} height={500} >
+      <BarChart layout='vertical' data={this.state.dataMiners}
+        margin={{top: 30, bottom: 100, left: 400}} >
+            <XAxis  hide dataKey="sum_gas" type = 'number' domain = {['dataMin', this.state.dataMiners[0].sum_gas * 3]}/>
+            <YAxis type = 'category' dataKey='miner' />
+            <Tooltip/>
+            <Legend />
+            <Bar name='gas' dataKey="sum_gas" stackId = 'a' fill="#663EFF" margin={{bottom: 100}}>
+                <LabelList dataKey="labelGas" position='right'/>
+            </Bar>
+            <Bar name='% from max' opacity={0} dataKey="labelMax" stackId = 'a' fill="#4CA334" margin={{bottom: 100}}>
+               
+            </Bar>
+            <Bar name='% from prev' opacity={0} dataKey="labelPrev" stackId = 'a' fill="#EB6844" margin={{bottom: 100}}>
+
+            </Bar>
+
+      </BarChart>
+      </ResponsiveContainer>
+
+      <LineChart width={600} height={300} data={this.state.dataLine}>
+        <CartesianGrid strokeDasharray="3 3"/>
+        <XAxis dataKey="daym" padding={{left: 30, right: 30}}/>
+        <YAxis  type="number" domain={['dataMin' , 'dataMax']} scale = 'linear'/>
+        <Tooltip/>
+        <Legend />
+        <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={3} activeDot={{r: 8}}/>
+      </LineChart>
       
-        <div className='d3-elem'>
-          <svg></svg>
+      <div className='d3-elem'>
+
+      <iframe src="https://app.redash.io/eth_analytics/embed/query/136742/visualization/234119?api_key=FnkIbCnjK2r2JzVjIzizZNso6lQRrqwTzOwmu6Yu" width="720" height="391"></iframe>
+
+
+          
+
         </div>
         <h1>123123</h1>
       </div>
