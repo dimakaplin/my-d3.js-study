@@ -643,17 +643,17 @@ const newText2 = legNew2.selectAll('text')
       <ResponsiveContainer width={1000} height={500} >
       <BarChart layout='vertical' data={this.state.dataMiners}
         margin={{top: 30, bottom: 100, left: 400}} >
-            <XAxis  hide dataKey="sum_gas" type = 'number' domain = {['dataMin', this.state.dataMiners[0].sum_gas * 3]}/>
-            <YAxis type = 'category' dataKey='miner' />
+            <XAxis  hide dataKey="sum_gas" type = 'number' domain = {['dataMin', this.state.dataMiners[0].sum_gas*2]}/>
+            <YAxis type = 'category' dataKey='miner' fontSize={12} fill="#2B2B2B"/>
             <Tooltip/>
-            <Legend />
-            <Bar name='gas' dataKey="sum_gas" stackId = 'a' fill="#663EFF" margin={{bottom: 100}}>
-                <LabelList dataKey="labelGas" position='right'/>
+            
+            <Bar name='gas' dataKey="sum_gas" stackId = 'a' fill="#FF1F72" margin={{bottom: 100}} opacity={0.7}>
+                <LabelList dataKey="labelGas" position='right' fontSize={12} fill="#2B2B2B" opacity={0.7}/>
             </Bar>
-            <Bar name='% from max' opacity={0} dataKey="labelMax" stackId = 'a' fill="#4CA334" margin={{bottom: 100}}>
+            <Bar name='% from max' opacity={0} dataKey="labelMax" stackId = 'a' fill="#2B2B2B" margin={{bottom: 100}}>
                
             </Bar>
-            <Bar name='% from prev' opacity={0} dataKey="labelPrev" stackId = 'a' fill="#EB6844" margin={{bottom: 100}}>
+            <Bar name='% from prev' opacity={0} dataKey="labelPrev" stackId = 'a' fill="#2B2B2B" margin={{bottom: 100}}>
 
             </Bar>
 
@@ -662,11 +662,12 @@ const newText2 = legNew2.selectAll('text')
 
       <LineChart width={600} height={300} data={this.state.dataLine}>
         <CartesianGrid strokeDasharray="3 3"/>
-        <XAxis dataKey="daym" padding={{left: 30, right: 30}}/>
-        <YAxis  type="number" domain={['dataMin' , 'dataMax']} scale = 'linear'/>
+        <XAxis dataKey="daym"/>
+        <YAxis  type="number" domain={['dataMin' , 'dataMax']}/>
         <Tooltip/>
         <Legend />
-        <Line type="monotone" dataKey="count" stroke="#8884d8" strokeWidth={3} activeDot={{r: 8}}/>
+        <Line type="monotone" opacity={0.7} dataKey="count" stroke="#FF1F72" strokeWidth={4} activeDot={{r: 3, fill: '#2B2B2B', opacity: '0.7'}}
+        dot={{ stroke: '#2B2B2B', strokeWidth: 2 , opacity: '0.7'}}/>
       </LineChart>
       
       <div className='d3-elem'>
